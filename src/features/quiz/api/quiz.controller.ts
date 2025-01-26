@@ -54,13 +54,6 @@ export class QuizController {
     return this.quizQueryRepository.answerOutput(answerId);
   }
 
-  // @Get('pairs/my')
-  // @UseGuards(JwtAuthGuard)
-  // async getAllMyGames(@Query() query: any, @Req() req: Request) {
-  //   const user = await this.usersService.getUserByAuthToken(req.headers.authorization as string);
-  //   return await this.quizQueryRepository.getAllMyGamesWithQuery(query, user);
-  // }
-
   @Get('users/my-statistic')
   @UseGuards(JwtAuthGuard)
   async getMyStatistic(@Req() req: Request) {
