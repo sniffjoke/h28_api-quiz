@@ -12,6 +12,7 @@ import { UsersTestManager } from './users-test-helpers';
 import { AuthTestManager } from './auth-test-helpers';
 import { CommentsTestManager } from './comments-test-helpers';
 import { DevicesTestManager } from './devices-test-helpers';
+import { QuestionsTestManager } from './questions-test-helpers';
 
 export const initSettings = async (
   //передаем callback, который получает ModuleBuilder,
@@ -49,6 +50,7 @@ export const initSettings = async (
   const authTestManager = new AuthTestManager(app);
   const commentTestManager = new CommentsTestManager(app);
   const deviceTestManager = new DevicesTestManager(app);
+  const questionTestManager = new QuestionsTestManager(app, configService);
 
   await deleteAllData(app);
 
@@ -64,6 +66,7 @@ export const initSettings = async (
     authTestManager,
     tokensService,
     commentTestManager,
-    deviceTestManager
+    deviceTestManager,
+    questionTestManager,
   };
 };
