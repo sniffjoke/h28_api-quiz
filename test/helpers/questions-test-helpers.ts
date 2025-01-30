@@ -15,7 +15,7 @@ export class QuestionsTestManager {
   ) {
   }
 
-  async createQuestion(createModel: CreateQuestionInputModel) {
+  async createQuestion(createModel: Partial<CreateQuestionInputModel>) {
     const apiSettings = this.configService.get('apiSettings', { infer: true });
     const response = await request(this.app.getHttpServer())
       .post('/sa/quiz/questions')
@@ -24,14 +24,23 @@ export class QuestionsTestManager {
     return response;
   }
 
-  // async createBlogWOAuth(createModel: BlogCreateModel) {
-  //   const response = await request(this.app.getHttpServer())
-  //     .post('/sa/blogs')
-  //     .send(createModel);
-  //   return response;
-  // }
+  async createQuestionWOSA(createModel: CreateQuestionInputModel) {
+    const response = await request(this.app.getHttpServer())
+      .post('/sa/quiz/questions')
+      .send(createModel);
+    return response;
+  }
 
-  async updateQuestion(updModel: UpdatePublishStatusInputModel, questionId: string) {
+  async updateQuestionByid(updModel: Partial<CreateQuestionInputModel>, questionId: string) {
+    const apiSettings = this.configService.get('apiSettings', { infer: true });
+    const response = await request(this.app.getHttpServer())
+      .put('/sa/quiz/questions/' + `${questionId}`)
+      .send(updModel)
+      .set({ 'Authorization': `Basic ` + codeAuth(apiSettings.ADMIN) });
+    return response;
+  }
+
+  async updateQuestionWithPublish(updModel: UpdatePublishStatusInputModel, questionId: string) {
     const apiSettings = this.configService.get('apiSettings', { infer: true });
     const response = await request(this.app.getHttpServer())
       .put('/sa/quiz/questions/' + `${questionId}` + '/publish')
@@ -48,15 +57,9 @@ export class QuestionsTestManager {
     return response;
   }
 
-  // async getQuestionsWOSA() {
-  //   const response = await request(this.app.getHttpServer())
-  //     .get('/sa/blogs/')
-  //   return response;
-  // }
-
-  async getQuestionById(blogId: string) {
+  async getQuestionsWOSA() {
     const response = await request(this.app.getHttpServer())
-      .get('/blogs/' + `${blogId}`);
+      .get('/sa/quiz/questions/')
     return response;
   }
 
@@ -65,7 +68,6 @@ export class QuestionsTestManager {
     const response = await request(this.app.getHttpServer())
       .delete('/sa/quiz/questions/' + `${questionId}`)
       .set({ 'Authorization': `Basic ` + codeAuth(apiSettings.ADMIN) })
-      .expect(204);
     return response;
   }
 
