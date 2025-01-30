@@ -242,7 +242,7 @@ export class QuizRepositoryTO {
       where: { id },
     });
     if (!findedQuestion) {
-      throw new NotFoundException(`Blog with id ${id} not found`);
+      throw new NotFoundException(`Question with id ${id} not found`);
     }
     return findedQuestion;
   }

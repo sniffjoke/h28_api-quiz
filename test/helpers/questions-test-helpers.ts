@@ -4,6 +4,9 @@ import { ConfigurationType } from '../../src/core/settings/env/configuration';
 import request from 'supertest';
 import { codeAuth } from './test-helpers';
 import { CreateQuestionInputModel } from '../../src/features/quiz/api/models/input/create-question.input.model';
+import {
+  UpdatePublishStatusInputModel
+} from '../../src/features/quiz/api/models/input/update-publish-status.input.model';
 
 export class QuestionsTestManager {
   constructor(
@@ -28,10 +31,10 @@ export class QuestionsTestManager {
   //   return response;
   // }
 
-  async updateQuestion(updModel: CreateQuestionInputModel, questionId: string) {
+  async updateQuestion(updModel: UpdatePublishStatusInputModel, questionId: string) {
     const apiSettings = this.configService.get('apiSettings', { infer: true });
     const response = await request(this.app.getHttpServer())
-      .put('/sa/quiz/questions/' + `${questionId}`)
+      .put('/sa/quiz/questions/' + `${questionId}` + '/publish')
       .send(updModel)
       .set({ 'Authorization': `Basic ` + codeAuth(apiSettings.ADMIN) });
     return response;

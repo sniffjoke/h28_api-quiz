@@ -5,6 +5,9 @@ import {
   createMockQuestion,
   QuestionsTestManager,
 } from '../helpers/questions-test-helpers';
+import { Repository } from 'typeorm';
+import { QuestionEntity } from '../../src/features/quiz/domain/question.entity';
+import { getRepositoryToken } from '@nestjs/typeorm';
 
 describe('QuestionsController (e2e)', () => {
   let app: INestApplication;
@@ -30,7 +33,6 @@ describe('QuestionsController (e2e)', () => {
       const question = await questionManager.createQuestion(
         createMockQuestion(1),
       );
-      console.log('body: ', question.body);
       expect(question.status).toBe(201);
       expect(question.body).toHaveProperty('id');
       expect(question.body).toHaveProperty('body');
@@ -51,65 +53,79 @@ describe('QuestionsController (e2e)', () => {
       );
       expect(question.body.createdAt).toBeDefined();
     });
-    //
-    // it('/sa/blogs/:id (UPDATE)', async () => {
-    //   const newBlog = await blogsManager.createBlog(createMockBlog(2));
-    //   const upd = await blogsManager.updateBlog(createMockBlog(3), newBlog.body.id);
-    //   const updatedBlog = await blogsManager.getBlogById(newBlog.body.id);
-    //   expect(upd.status).toBe(204);
-    //   expect(updatedBlog.body.id).toEqual(newBlog.body.id);
-    //   expect(updatedBlog.body.name).not.toEqual(newBlog.body.name);
-    //   expect(updatedBlog.body.description).not.toEqual(newBlog.body.description);
-    //   expect(updatedBlog.body.websiteUrl).not.toEqual(newBlog.body.websiteUrl);
-    // });
 
-    // it('/sa/blogs/:id (DELETE)', async () => {
-    //   const newBlog = await blogsManager.createBlog(createMockBlog(4));
-    //   const response = await blogsManager.deleteBlog(newBlog.body.id);
-    //   const blogs = await blogsManager.getBlogsWithSA();
-    //   expect(response.status).toBe(204);
-    //   // expect(blogs.body.items.length).toBeLessThan(1);
-    // });
-    //
-    // it('/blogs (GET)', async () => {
-    //   for (let i = 5; i < 15; i++) {
-    //     let newBlog = await blogsManager.createBlog(createMockBlog(i));
-    //   }
-    //   const blogs = await blogsManager.getBlogs();
-    //   expect(blogs.status).toBe(200);
-    //   expect(Array.isArray(blogs.body.items)).toBe(true);
-    //   // toHaveLength
-    //   expect(blogs.body.items.length).toBeGreaterThan(0);
-    //   //toEqual
-    //   blogs.body.items.forEach((blog: any) => {
-    //     expect(blog).toHaveProperty('id');
-    //     expect(blog).toHaveProperty('name');
-    //     expect(blog).toHaveProperty('description');
-    //     expect(blog).toHaveProperty('websiteUrl');
-    //     expect(blog).toHaveProperty('createdAt');
-    //     expect(blog).toHaveProperty('isMembership');
-    //   });
-    //   blogs.body.items.forEach((blog: any) => {
-    //     expect(blog.createdAt).toBeDefined();
-    //     expect(blog.isMembership).toBeDefined();
-    //     // regular
-    //     expect(new Date(blog.createdAt).toISOString()).toContain('T');
-    //   });
-    //   expect(blogs.body.items[0]).toEqual(
-    //     expect.objectContaining({
-    //       id: expect.any(String),
-    //       name: expect.any(String),
-    //       description: expect.any(String),
-    //       // regular to constant
-    //       websiteUrl: expect.stringMatching(/^https?:\/\/[^\s$.?#].[^\s]*$/),
-    //       createdAt: expect.any(String),
-    //       isMembership: expect.any(Boolean),
-    //     }),
-    //   );
-    //   if (blogs.body.items.length === 0) {
-    //     expect(blogs.body.items).toEqual([]);
-    //   }
-    // });
+    it('/sa/quiz/questions/:id/publish (UPDATE)', async () => {
+      const question = await questionManager.createQuestion(createMockQuestion(2));
+      const upd = await questionManager.updateQuestion(
+        {
+          published: true,
+        },
+        question.body.id
+      );
+      expect(upd.status).toBe(204);
+      const questionsRepository = app.get<Repository<QuestionEntity>>(getRepositoryToken(QuestionEntity));
+      const updatedQuestion = await questionsRepository.findOne({
+        where: { id: question.body.id },
+      });
+      // expect(upd.status).toBe(204);
+      // expect(updatedBlog.body.id).toEqual(newBlog.body.id);
+      // expect(updatedBlog.body.name).not.toEqual(newBlog.body.name);
+      // expect(updatedBlog.body.description).not.toEqual(newBlog.body.description);
+      // expect(updatedBlog.body.websiteUrl).not.toEqual(newBlog.body.websiteUrl);
+    });
+
+    it('/sa/quiz/questions/:id (DELETE)', async () => {
+      const newQuestion = await questionManager.createQuestion(createMockQuestion(3));
+      const response = await questionManager.deleteQuestion(newQuestion.body.id);
+      const questionsRepository = app.get<Repository<QuestionEntity>>(getRepositoryToken(QuestionEntity));
+      const deletedQuestion = await questionsRepository.findOne({
+        where: { id: newQuestion.body.id },
+      });
+      const questions = await questionManager.getQuestions()
+      expect(response.status).toBe(204);
+      expect(deletedQuestion).toBe(null);
+      expect(questions.body.items.length).toBeLessThan(1);
+    });
+
+    it('/blogs (GET)', async () => {
+      for (let i = 5; i < 15; i++) {
+        let newQuestion = await questionManager.createQuestion(createMockQuestion(i));
+      }
+      const questions = await questionManager.getQuestions();
+      expect(questions.status).toBe(200);
+      expect(Array.isArray(questions.body.items)).toBe(true);
+      // toHaveLength
+      expect(questions.body.items.length).toBeGreaterThan(0);
+      //toEqual
+      questions.body.items.forEach((blog: any) => {
+        expect(blog).toHaveProperty('id');
+        expect(blog).toHaveProperty('name');
+        expect(blog).toHaveProperty('description');
+        expect(blog).toHaveProperty('websiteUrl');
+        expect(blog).toHaveProperty('createdAt');
+        expect(blog).toHaveProperty('isMembership');
+      });
+      questions.body.items.forEach((blog: any) => {
+        expect(blog.createdAt).toBeDefined();
+        expect(blog.isMembership).toBeDefined();
+        // regular
+        expect(new Date(blog.createdAt).toISOString()).toContain('T');
+      });
+      expect(questions.body.items[0]).toEqual(
+        expect.objectContaining({
+          id: expect.any(String),
+          name: expect.any(String),
+          description: expect.any(String),
+          // regular to constant
+          websiteUrl: expect.stringMatching(/^https?:\/\/[^\s$.?#].[^\s]*$/),
+          createdAt: expect.any(String),
+          isMembership: expect.any(Boolean),
+        }),
+      );
+      if (questions.body.items.length === 0) {
+        expect(questions.body.items).toEqual([]);
+      }
+    });
     //
     // it('/sa/blogs (GET)', async () => {
     //   for (let i = 16; i < 26; i++) {
