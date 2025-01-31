@@ -5,7 +5,7 @@ import {
   createMockQuestion,
   QuestionsTestManager,
 } from '../helpers/questions-test-helpers';
-import { GameTestManager } from '../helpers/game-test-helpers';
+import { createMockAnswer, GameTestManager } from '../helpers/game-test-helpers';
 import {
   createMockUser,
   UsersTestManager,
@@ -147,11 +147,13 @@ describe('QuizController (e2e)', () => {
         login3.body.accessToken,
         createGame.body.id,
       );
-      console.log('game: ', response.body);
-      // const question = await questionManager.createQuestion(
-      //   createMockQuestion(1),
-      // );
-      // expect(question.body.createdAt).toBeDefined();
+    });
+
+    it('/pair-game-quiz/pairs/my-current/answers (POST)', async () => {
+      const sendAnswerF = await gameManager.sendAnswer(createMockAnswer('correct'), login1.body.accessToken);
+      const sendAnswerS = await gameManager.sendAnswer(createMockAnswer('incorrect'), login2.body.accessToken);
+      console.log('1: ', sendAnswerF.body);
+      console.log('2: ', sendAnswerS.body);
     });
 
   });

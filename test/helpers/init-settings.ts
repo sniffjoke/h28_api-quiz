@@ -52,7 +52,7 @@ export const initSettings = async (
   const commentTestManager = new CommentsTestManager(app);
   const deviceTestManager = new DevicesTestManager(app);
   const questionTestManager = new QuestionsTestManager(app, configService);
-  const gameTestManager = new GameTestManager(app, configService);
+  const gameTestManager = new GameTestManager(app);
 
   await deleteAllData(app);
 

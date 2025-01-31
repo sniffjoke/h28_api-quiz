@@ -1,13 +1,10 @@
 import { INestApplication } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { ConfigurationType } from '../../src/core/settings/env/configuration';
 import request from 'supertest';
 import { CreateAnswerInputModel } from '../../src/features/quiz/api/models/input/create-answer.input.model';
 
 export class GameTestManager {
   constructor(
     protected readonly app: INestApplication,
-    private configService: ConfigService<ConfigurationType, true>,
   ) {
   }
 
@@ -49,7 +46,6 @@ export class GameTestManager {
 
 }
 
-// export const createMockQuestion = (uniqueIndex: number): CreateQuestionInputModel => ({
-//   body: 'body10SymbolsMin' + `${uniqueIndex}`,
-//   correctAnswers: ['Correct'],
-// });
+export const createMockAnswer = (data: string): CreateAnswerInputModel => ({
+  answer: data,
+});
