@@ -13,6 +13,7 @@ import { AuthTestManager } from './auth-test-helpers';
 import { CommentsTestManager } from './comments-test-helpers';
 import { DevicesTestManager } from './devices-test-helpers';
 import { QuestionsTestManager } from './questions-test-helpers';
+import { GameTestManager } from './game-test-helpers';
 
 export const initSettings = async (
   //передаем callback, который получает ModuleBuilder,
@@ -51,6 +52,7 @@ export const initSettings = async (
   const commentTestManager = new CommentsTestManager(app);
   const deviceTestManager = new DevicesTestManager(app);
   const questionTestManager = new QuestionsTestManager(app, configService);
+  const gameTestManager = new GameTestManager(app, configService);
 
   await deleteAllData(app);
 
@@ -68,5 +70,6 @@ export const initSettings = async (
     commentTestManager,
     deviceTestManager,
     questionTestManager,
+    gameTestManager
   };
 };
