@@ -1,10 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { QuizRepositoryTO } from '../infrastructure/quiz.repository.to';
 import { UsersService } from '../../users/application/users.service';
 import { CreateAnswerInputModel } from '../api/models/input/create-answer.input.model';
 import { CreateQuestionInputModel } from '../api/models/input/create-question.input.model';
 import { UpdatePublishStatusInputModel } from '../api/models/input/update-publish-status.input.model';
-import { UserEntity } from '../../users/domain/user.entity';
 
 @Injectable()
 export class QuizService {
@@ -18,16 +17,22 @@ export class QuizService {
 
   async getCurrentUnfGame(bearerHeader: string) {
     const user = await this.usersService.getUserByAuthToken(bearerHeader);
-    return await this.quizRepository.getGame(user);
+    return await this.quizRepository.findGameByUser(user);
   }
 
   async findGameById(id: number, bearerHeader: string) {
     const user = await this.usersService.getUserByAuthToken(bearerHeader);
-    return await this.quizRepository.findGame(id, user);
+    return await this.quizRepository.findGameById(id, user);
   }
 
   async createOrConnect(bearerHeader: string): Promise<number> {
     const user = await this.usersService.getUserByAuthToken(bearerHeader);
+    const findUserGames = await this.quizRepository.findLastActiveGameForUser(user)
+    for (const item of findUserGames) {
+      if (item.firstPlayerProgress.userId === user.id || item?.secondPlayerProgress?.userId === user.id) {
+        throw new ForbiddenException('You cant connect because have an active game');
+      }
+    }
     return await this.quizRepository.findOrCreateConnection(user);
   }
 
@@ -41,13 +46,17 @@ export class QuizService {
   }
 
   //------------------------------------------------------------------------------------------//
-  //----------------------------------------QUESTIONS-----------------------------------------//
+  //-----------------------------------------ANSWERS------------------------------------------//
   //------------------------------------------------------------------------------------------//
 
   async sendAnswer(answerData: CreateAnswerInputModel, bearerHeader: string) {
     const user = await this.usersService.getUserByAuthToken(bearerHeader);
     return await this.quizRepository.sendAnswer(answerData.answer, user);
   }
+
+  //------------------------------------------------------------------------------------------//
+  //----------------------------------------QUESTIONS-----------------------------------------//
+  //------------------------------------------------------------------------------------------//
 
   async createNewQuestion(questionData: CreateQuestionInputModel): Promise<string> {
     const newQuestionId = await this.quizRepository.createQuestion(questionData);

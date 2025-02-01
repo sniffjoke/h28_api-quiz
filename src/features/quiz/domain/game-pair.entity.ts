@@ -1,16 +1,14 @@
 import {
   Column,
-  CreateDateColumn,
   Entity,
   JoinColumn, JoinTable, ManyToMany,
-  ManyToOne,
-  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { GameStatuses } from '../api/models/input/create-pairs-status.input.model';
 import { QuestionEntity } from './question.entity';
 import { PlayerProgressEntity } from './player-progress.entity';
+import { UserEntity } from '../../users/domain/user.entity';
 
 @Entity('gamePair')
 export class GamePairEntity {
@@ -48,17 +46,35 @@ export class GamePairEntity {
   @Column({ type: 'timestamp', nullable: true, default: null })
   finishGameDate: string;
 
-  // @Column('text', { array: true })
-  // questionsIds: string[]
-
-  // @Column({ type: 'json', default: () => "'[]'" })
-  // questions: { text: string; createdAt: string }[];
-
   @ManyToMany(() => QuestionEntity, (question) => question.gamePairs, {
     cascade: true,
     nullable: true
   })
   @JoinTable()
-    // @JoinColumn({name: 'questionsIds'})
   questions: QuestionEntity[] | null;
+
+  static createGame(questions: QuestionEntity[] | null, user: UserEntity): GamePairEntity {
+    const newGame = new GamePairEntity();
+    newGame.status = GameStatuses.PendingSecondPlayer;
+    newGame.questions = questions;
+    const firstPlayerProgress = new PlayerProgressEntity();
+    firstPlayerProgress.userId = user.id;
+    firstPlayerProgress.user = user;
+    firstPlayerProgress.answers = [];
+    newGame.firstPlayerProgress = firstPlayerProgress;
+    newGame.secondPlayerProgressId = null;
+    return newGame;
+  }
+
+  startGame(gamePair: GamePairEntity, questions: QuestionEntity[] | null, user: UserEntity): void {
+    gamePair.status = GameStatuses.Active;
+    gamePair.startGameDate = new Date(Date.now()).toISOString();
+    gamePair.questions = questions;
+    const secondPlayerProgress = new PlayerProgressEntity();
+    secondPlayerProgress.userId = user.id;
+    secondPlayerProgress.user = user;
+    secondPlayerProgress.answers = [];
+    gamePair.secondPlayerProgress = secondPlayerProgress;
+  }
+
 }
