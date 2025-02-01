@@ -13,6 +13,7 @@ import { UsersModule } from '../users/users.module';
 import { QuestionsController } from './api/questions.controller';
 import { UserScoreEntity } from './domain/user-score.entity';
 import { GenerateStatisticHandler } from './domain/generate-statistic.handler';
+import { LoggerService } from '../../logger.service';
 
 @Module({
   imports: [
@@ -31,7 +32,8 @@ import { GenerateStatisticHandler } from './domain/generate-statistic.handler';
     QuizQueryRepositoryTO,
     QuizRepositoryTO,
     QuizService,
-    GenerateStatisticHandler
+    GenerateStatisticHandler,
+    LoggerService
   ],
   exports: [
     // QuizQueryRepositoryTO

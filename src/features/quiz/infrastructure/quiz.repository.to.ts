@@ -19,6 +19,7 @@ import { CreateQuestionInputModel } from '../api/models/input/create-question.in
 import { UpdatePublishStatusInputModel } from '../api/models/input/update-publish-status.input.model';
 import { UserScoreEntity } from '../domain/user-score.entity';
 import { GenerateStatisticHandler } from '../domain/generate-statistic.handler';
+import { LoggerService } from '../../../logger.service';
 
 @Injectable()
 export class QuizRepositoryTO {
@@ -30,7 +31,11 @@ export class QuizRepositoryTO {
     @InjectRepository(UserScoreEntity)
     private readonly userScoreRepository: Repository<UserScoreEntity>,
     private readonly genStatHandler: GenerateStatisticHandler,
-  ) {}
+    private logger: LoggerService
+  ) {
+    this.logger.setContext(QuizRepositoryTO.name);
+    console.log('QuizRepository creating');
+  }
 
   //------------------------------------------------------------------------------------------//
   //-------------------------------------GAMEPAIRS--------------------------------------------//

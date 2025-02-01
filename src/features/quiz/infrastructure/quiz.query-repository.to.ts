@@ -215,7 +215,6 @@ export class QuizQueryRepositoryTO {
 
   async getAllStatistic(query: any): Promise<PaginationBaseModel<UserScoreEntity>> {
     const generateQuery = await this.generateQueryForAllStats(query);
-    console.log('generate: ', generateQuery);
     const sortOptions = generateQuery.sort.map((item) => {
       const [key, value] = item.split(' ')
       return {sortKey: key, sortValue: value.toUpperCase()}

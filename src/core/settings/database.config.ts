@@ -24,6 +24,7 @@ export class TypeOrmConfigService {
             //         rejectUnauthorized: false, // Важно для подключения к Heroku Postgres
             //     },
             // },
+            extra: databaseSettings.SSL_CONNECTION === '1' ? { ssl: { rejectUnauthorized: false } } : {}
         }
     }
 }
