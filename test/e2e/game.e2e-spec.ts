@@ -77,17 +77,10 @@ describe('QuizController (e2e)', () => {
           createMockQuestion(i),
         );
       }
+
       const createGame = await gameManager.createGameOrConnect(
         login1.body.accessToken,
       );
-      const connectGame = await gameManager.createGameOrConnect(
-        login2.body.accessToken,
-      );
-      // console.log('create: ', createGame.body);
-      // console.log('conn: ', connectGame.body);
-      // const question = await questionManager.createQuestion(
-      //   createMockQuestion(1),
-      // );
       expect(createGame.status).toBe(200);
       expect(createGame.body).toHaveProperty('id');
       expect(createGame.body).toHaveProperty('firstPlayerProgress');
@@ -102,7 +95,7 @@ describe('QuizController (e2e)', () => {
         expect.objectContaining({
           id: expect.any(String),
           firstPlayerProgress: expect.any(Object),
-          secondPlayerProgress: expect.any(Object),
+          secondPlayerProgress: null,
           questions: null,
           status: expect.any(String),
           pairCreatedDate: expect.any(String),
@@ -110,29 +103,77 @@ describe('QuizController (e2e)', () => {
           finishGameDate: null,
         }),
       );
-      // expect(question.body.createdAt).toBeDefined();
+
+      const connectGame = await gameManager.createGameOrConnect(
+        login2.body.accessToken,
+      );
+      expect(connectGame.status).toBe(200);
+      expect(connectGame.body).toHaveProperty('id');
+      expect(connectGame.body).toHaveProperty('firstPlayerProgress');
+      expect(connectGame.body).toHaveProperty('secondPlayerProgress');
+      expect(connectGame.body).toHaveProperty('questions');
+      expect(connectGame.body).toHaveProperty('status');
+      expect(connectGame.body).toHaveProperty('pairCreatedDate');
+      expect(connectGame.body).toHaveProperty('startGameDate');
+      expect(connectGame.body).toHaveProperty('finishGameDate');
+      expect(new Date(connectGame.body.pairCreatedDate).toISOString()).toContain('T');
+      expect(new Date(connectGame.body.startGameDate).toISOString()).toContain('T');
+      expect(connectGame.body).toEqual(
+        expect.objectContaining({
+          id: expect.any(String),
+          firstPlayerProgress: expect.any(Object),
+          secondPlayerProgress: expect.any(Object),
+          questions: expect.arrayContaining([]),
+          status: expect.any(String),
+          pairCreatedDate: expect.any(String),
+          startGameDate: expect.any(String),
+          finishGameDate: null,
+        }),
+      );
+
+      connectGame.body.questions.forEach((question: any) => {
+        expect(question).toHaveProperty('id');
+        expect(question).toHaveProperty('body');
+      });
     });
 
     it('/pair-game-quiz/pairs/my-current (GET)', async () => {
       const response = await gameManager.getUnfinishedGame(
         login1.body.accessToken,
       );
-      // console.log('game: ', response.body);
-      // const question = await questionManager.createQuestion(
-      //   createMockQuestion(1),
-      // );
-      // expect(question.body.createdAt).toBeDefined();
     });
 
     it('/pair-game-quiz/pairs/my (GET)', async () => {
       const response = await gameManager.getAllMyGames(
         login1.body.accessToken,
       );
-      // console.log('game: ', response.body);
-      // const question = await questionManager.createQuestion(
-      //   createMockQuestion(1),
-      // );
-      // expect(question.body.createdAt).toBeDefined();
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty('pageSize');
+      expect(response.body).toHaveProperty('pagesCount');
+      expect(response.body).toHaveProperty('totalCount');
+      expect(response.body).toHaveProperty('page');
+      expect(response.body).toHaveProperty('items');
+      response.body.items.forEach((item: any) => {
+        expect(item).toHaveProperty('id');
+        expect(item).toHaveProperty('firstPlayerProgress');
+        expect(item).toHaveProperty('secondPlayerProgress');
+        expect(item).toHaveProperty('questions');
+        expect(item).toHaveProperty('status');
+        expect(item).toHaveProperty('pairCreatedDate');
+        expect(item).toHaveProperty('startGameDate');
+        expect(item).toHaveProperty('finishGameDate');
+      });
+      expect(response.body).toEqual(
+        expect.objectContaining({
+          pageSize: expect.any(Number),
+          pagesCount: expect.any(Number),
+          totalCount: expect.any(Number),
+          page: expect.any(Number),
+          items: expect.arrayContaining([]),
+        }),
+      );
+      console.log('resp: ', response.body);
+      console.log('st: ', response.status);
     });
 
     it('/pair-game-quiz/pairs/:id (GET)', async () => {
@@ -152,8 +193,6 @@ describe('QuizController (e2e)', () => {
     it('/pair-game-quiz/pairs/my-current/answers (POST)', async () => {
       const sendAnswerF = await gameManager.sendAnswer(createMockAnswer('correct'), login1.body.accessToken);
       const sendAnswerS = await gameManager.sendAnswer(createMockAnswer('incorrect'), login2.body.accessToken);
-      console.log('1: ', sendAnswerF.body);
-      console.log('2: ', sendAnswerS.body);
     });
 
   });
