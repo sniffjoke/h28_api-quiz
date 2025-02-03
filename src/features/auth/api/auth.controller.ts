@@ -17,6 +17,8 @@ import { GetMeCommand } from '../application/useCases/get-me.use-case';
 import { RefreshTokenCommand } from '../application/useCases/refresh-token.use-case';
 import { LogoutCommand } from '../application/useCases/logout.use-case';
 import { UsersQueryRepositoryTO } from '../../users/infrastructure/users.query-repositories.to';
+import { LocalStrategy } from '../local.strategy';
+import { LocalAuthGuard } from '../../../core/guards/local-auth.guard';
 
 
 @Controller('auth')
@@ -34,6 +36,7 @@ export class AuthController {
     return userData;
   }
 
+  @UseGuards(LocalAuthGuard)
   @Post('login')
   @HttpCode(200)
   // @UseGuards(ThrottlerGuard)
@@ -43,6 +46,7 @@ export class AuthController {
     @UserAgent() userAgent: string,
     @Req() req: Request,
   ) {
+    console.log('req: ', req.user);
     const myIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress
     const { accessToken, refreshToken } = await this.commandBus.execute(
       new LoginCommand(

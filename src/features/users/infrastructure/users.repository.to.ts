@@ -149,10 +149,4 @@ export class UsersRepositoryTO {
     return findedEmailInfo;
   }
 
-  async getAllUsers() {
-    const items = await this.uRepository
-      .find();
-    return items;
-  }
-
 }
