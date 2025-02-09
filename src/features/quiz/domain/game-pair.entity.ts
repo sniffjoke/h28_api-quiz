@@ -77,4 +77,9 @@ export class GamePairEntity {
     gamePair.secondPlayerProgress = secondPlayerProgress;
   }
 
+  finishGame(gamePair: GamePairEntity): void {
+    gamePair.status = GameStatuses.Finished;
+    gamePair.finishGameDate = new Date(Date.now()).toISOString();
+  }
+
 }

@@ -15,10 +15,12 @@ import  { TypeOrmConfigService } from './core/settings/database.config';
 import { MailSendModule } from './core/settings/mailer.module';
 import configuration, { validate } from './core/settings/env/configuration';
 import { QuizModule } from './features/quiz/quiz.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
     CqrsModule.forRoot(),
+    ScheduleModule.forRoot(),
     ThrottlerModule.forRoot([{
       ttl: 10000,
       limit: 5,

@@ -41,6 +41,21 @@ export class QuizRepositoryTO {
   //-------------------------------------GAMEPAIRS--------------------------------------------//
   //------------------------------------------------------------------------------------------//
 
+  async findAllActiveGames() {
+    const activeGames = await this.gRepository.find({
+      where: [
+        { status: GameStatuses.Active},
+      ],
+      relations: ['firstPlayerProgress.answers', 'secondPlayerProgress.answers'],
+    });
+    return activeGames;
+  }
+
+  async finishGame(gamePair: GamePairEntity) {
+    gamePair.finishGame(gamePair);
+    return await this.gRepository.save(gamePair);
+  }
+
   async findLastActiveGameForUser(user: UserEntity) {
     const findLastGameForCurrentUser = await this.gRepository.find({
       where: { status: GameStatuses.Active },
@@ -209,8 +224,9 @@ export class QuizRepositoryTO {
       saveAnswer.firstPlayerProgress.answers.length === 5 &&
       saveAnswer.secondPlayerProgress.answers.length === 5
     ) {
-      findedGame.status = GameStatuses.Finished;
-      findedGame.finishGameDate = new Date(Date.now()).toISOString();
+      findedGame.finishGame(saveAnswer)
+      // findedGame.status = GameStatuses.Finished;
+      // findedGame.finishGameDate = new Date(Date.now()).toISOString();
       const hasCorrectAnswerFirstPlayer =
         saveAnswer.firstPlayerProgress.answers.some(
           (item) => item.answerStatus === 'Correct',

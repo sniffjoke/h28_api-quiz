@@ -4,6 +4,7 @@ import { UsersService } from '../../users/application/users.service';
 import { CreateAnswerInputModel } from '../api/models/input/create-answer.input.model';
 import { CreateQuestionInputModel } from '../api/models/input/create-question.input.model';
 import { UpdatePublishStatusInputModel } from '../api/models/input/update-publish-status.input.model';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
 export class QuizService {
@@ -18,6 +19,21 @@ export class QuizService {
   async getCurrentUnfGame(bearerHeader: string) {
     const user = await this.usersService.getUserByAuthToken(bearerHeader);
     return await this.quizRepository.findGameByUser(user);
+  }
+
+  @Cron(CronExpression.EVERY_10_SECONDS)
+  async loggerId() {
+    let lastAnswerTime
+    const currentActiveGames = await this.quizRepository.findAllActiveGames()
+    for (const game of currentActiveGames) {
+      if (game.firstPlayerProgress.answers.length === 5) {
+        lastAnswerTime = game.secondPlayerProgress.answers.length ? Date.parse(game.secondPlayerProgress.answers[game.secondPlayerProgress.answers.length - 1].addedAt) : 0;
+        // if (game.secondPlayerProgress.answers.length < 5) {}
+        if (game.secondPlayerProgress.answers.length < 5  && Date.parse(new Date(Date.now()).toString()) - 10000 > Date.parse(game.firstPlayerProgress.answers[game.firstPlayerProgress.answers.length - 1].addedAt)) {
+          await this.quizRepository.finishGame(game);
+        }
+      }
+    }
   }
 
   async findGameById(id: number, bearerHeader: string) {
