@@ -75,5 +75,5 @@ export class QuestionsTestManager {
 
 export const createMockQuestion = (uniqueIndex: number): CreateQuestionInputModel => ({
   body: 'body10SymbolsMin' + `${uniqueIndex}`,
-  correctAnswers: ['Correct'],
+  correctAnswers: ['correct'],
 });

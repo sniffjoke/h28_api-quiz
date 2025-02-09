@@ -31,7 +31,7 @@ export class QuizRepositoryTO {
     @InjectRepository(UserScoreEntity)
     private readonly userScoreRepository: Repository<UserScoreEntity>,
     private readonly genStatHandler: GenerateStatisticHandler,
-    private logger: LoggerService
+    private logger: LoggerService,
   ) {
     this.logger.setContext(QuizRepositoryTO.name);
     console.log('QuizRepository creating');
@@ -223,7 +223,6 @@ export class QuizRepositoryTO {
         saveAnswer.firstPlayerProgress.answers.at(-1);
       const secondPlayerLastAnswer =
         saveAnswer.secondPlayerProgress.answers.at(-1);
-
       if (
         firstPlayerLastAnswer &&
         secondPlayerLastAnswer &&
@@ -233,7 +232,6 @@ export class QuizRepositoryTO {
       ) {
         findedGame.firstPlayerProgress.score++;
       }
-
       if (
         firstPlayerLastAnswer &&
         secondPlayerLastAnswer &&
@@ -251,8 +249,12 @@ export class QuizRepositoryTO {
       if (firstUserScore && secondUserScore) {
         const [generateStatisticForFirstUser, generateStatisticForSecondUser] =
           await Promise.all([
-            await this.genStatHandler.generateStatisticForUser(saveAnswer.firstPlayerProgress.user),
-            await this.genStatHandler.generateStatisticForUser(saveAnswer.secondPlayerProgress.user)
+            await this.genStatHandler.generateStatisticForUser(
+              saveAnswer.firstPlayerProgress.user,
+            ),
+            await this.genStatHandler.generateStatisticForUser(
+              saveAnswer.secondPlayerProgress.user,
+            ),
           ]);
         Object.assign(firstUserScore, generateStatisticForFirstUser);
         Object.assign(secondUserScore, generateStatisticForSecondUser);
