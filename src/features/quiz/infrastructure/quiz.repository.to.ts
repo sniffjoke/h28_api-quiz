@@ -43,10 +43,11 @@ export class QuizRepositoryTO {
 
   async findAllActiveGames() {
     const activeGames = await this.gRepository.find({
-      where: [
-        { status: GameStatuses.Active},
+      where: [{ status: GameStatuses.Active }],
+      relations: [
+        'firstPlayerProgress.answers',
+        'secondPlayerProgress.answers',
       ],
-      relations: ['firstPlayerProgress.answers', 'secondPlayerProgress.answers'],
     });
     return activeGames;
   }
@@ -224,7 +225,7 @@ export class QuizRepositoryTO {
       saveAnswer.firstPlayerProgress.answers.length === 5 &&
       saveAnswer.secondPlayerProgress.answers.length === 5
     ) {
-      findedGame.finishGame(saveAnswer)
+      findedGame.finishGame(saveAnswer);
       // findedGame.status = GameStatuses.Finished;
       // findedGame.finishGameDate = new Date(Date.now()).toISOString();
 
@@ -258,7 +259,7 @@ export class QuizRepositoryTO {
       // ) {
       //   findedGame.secondPlayerProgress.score++;
       // }
-      findedGame = this.calculateScore(findedGame)
+      findedGame = this.calculateScore(findedGame);
       saveAnswer = await this.gRepository.save(findedGame);
       const [firstUserScore, secondUserScore] = await Promise.all([
         await this.getUserScore(saveAnswer.firstPlayerProgress.user.id),
@@ -286,10 +287,14 @@ export class QuizRepositoryTO {
       return saveScores.firstPlayerProgress.answers[
         saveAnswer.firstPlayerProgress.answers.length - 1
       ].id;
-    } else
+    } else {
+      console.log(Date.parse(saveScores.secondPlayerProgress.answers[
+      saveAnswer.secondPlayerProgress.answers.length - 1
+        ].addedAt));
       return saveScores.secondPlayerProgress.answers[
         saveAnswer.secondPlayerProgress.answers.length - 1
       ].id;
+    }
   }
 
   calculateScore(gamePair: GamePairEntity) {
@@ -301,29 +306,36 @@ export class QuizRepositoryTO {
       gamePair.secondPlayerProgress.answers.some(
         (item) => item.answerStatus === 'Correct',
       );
-    const firstPlayerLastAnswer =
-      gamePair.firstPlayerProgress.answers.at(-1);
-    const secondPlayerLastAnswer =
-      gamePair.secondPlayerProgress.answers.at(-1);
+    const firstPlayerLastAnswer = gamePair.firstPlayerProgress.answers.at(-1);
+    const secondPlayerLastAnswer = gamePair.secondPlayerProgress.answers.at(-1);
+    console.log('fst: ', firstPlayerLastAnswer);
+    console.log('scd: ', secondPlayerLastAnswer);
     if (
       firstPlayerLastAnswer &&
       secondPlayerLastAnswer &&
       Date.parse(firstPlayerLastAnswer.addedAt) <
-      Date.parse(secondPlayerLastAnswer.addedAt) &&
+        Date.parse(secondPlayerLastAnswer.addedAt) &&
       hasCorrectAnswerFirstPlayer
     ) {
+      gamePair.firstPlayerProgress.score++;
+    }
+    if (!secondPlayerLastAnswer) {
       gamePair.firstPlayerProgress.score++;
     }
     if (
       firstPlayerLastAnswer &&
       secondPlayerLastAnswer &&
       Date.parse(secondPlayerLastAnswer.addedAt) <
-      Date.parse(firstPlayerLastAnswer.addedAt) &&
+        Date.parse(firstPlayerLastAnswer.addedAt) &&
       hasCorrectAnswerSecondPlayer
     ) {
       gamePair.secondPlayerProgress.score++;
     }
-    return gamePair
+    if (!firstPlayerLastAnswer) {
+      gamePair.secondPlayerProgress.score++;
+    }
+    console.log('gamePairAfter: ', gamePair);
+    return gamePair;
   }
 
   //------------------------------------------------------------------------------------------//

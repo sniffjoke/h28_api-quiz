@@ -29,18 +29,23 @@ export class QuizService {
       if (game.firstPlayerProgress.answers.length === 5) {
         lastAnswerTime = game.secondPlayerProgress.answers.length ? Date.parse(game.secondPlayerProgress.answers[game.secondPlayerProgress.answers.length - 1].addedAt) : 0;
         // if (game.secondPlayerProgress.answers.length < 5) {}
-        if (game.secondPlayerProgress.answers.length < 5  && Date.parse(new Date(Date.now()).toString()) - 10000 > lastAnswerTime) {
+        if (game.secondPlayerProgress.answers.length < 5  && Date.parse(new Date(Date.now()).toISOString().slice(0, 19).replace('T', ' ')) - 10000 > lastAnswerTime) {
           game = this.quizRepository.calculateScore(game)
           await this.quizRepository.finishGame(game);
         }
       }
       if (game.secondPlayerProgress.answers.length === 5) {
-        console.log(2);
-        // console.log(Date.parse(game.firstPlayerProgress.answers[game.firstPlayerProgress.answers.length - 1].addedAt));
-        // console.log(game.firstPlayerProgress.answers.length > 0);
-        lastAnswerTime = game.firstPlayerProgress.answers.length ? Date.parse(game.firstPlayerProgress.answers[game.firstPlayerProgress.answers.length - 1].addedAt) : 0;
-        if (game.firstPlayerProgress.answers.length < 5  && Date.parse(new Date(Date.now()).toString()) - 10000 > lastAnswerTime) {
+        lastAnswerTime = game.firstPlayerProgress.answers.length
+          ? Date.parse(game.firstPlayerProgress.answers[game.firstPlayerProgress.answers.length - 1].addedAt)
+          : Date.parse(game.secondPlayerProgress.answers[game.secondPlayerProgress.answers.length - 1].addedAt);
+        if (game.firstPlayerProgress.answers.length < 5  && Date.parse(new Date(Date.now()).toISOString().slice(0, 19).replace('T', ' ')) - 10000 > lastAnswerTime) {
+          // new Date(Date.now()).toISOString().slice(0, 19).replace('T', ' ')
+          // console.log('difference: ', Date.parse(new Date(Date.now()).toISOString()) - lastAnswerTime);
+          // console.log('curr: ', Date.parse(new Date(Date.now()).toISOString().slice(0, 19).replace('T', ' ')));
+          console.log('last: ', lastAnswerTime);
+          // console.log('finish');
           game = this.quizRepository.calculateScore(game)
+          // console.log('game: ', game);
           await this.quizRepository.finishGame(game);
         }
       }
