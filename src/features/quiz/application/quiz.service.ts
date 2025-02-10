@@ -29,16 +29,17 @@ export class QuizService {
       if (game.firstPlayerProgress.answers.length === 5) {
         lastAnswerTime = game.secondPlayerProgress.answers.length ? Date.parse(game.secondPlayerProgress.answers[game.secondPlayerProgress.answers.length - 1].addedAt) : 0;
         // if (game.secondPlayerProgress.answers.length < 5) {}
-        if (game.secondPlayerProgress.answers.length < 5  && Date.parse(new Date(Date.now()).toString()) - 10000 > Date.parse(game.firstPlayerProgress.answers[game.firstPlayerProgress.answers.length - 1].addedAt)) {
+        if (game.secondPlayerProgress.answers.length < 5  && Date.parse(new Date(Date.now()).toString()) - 10000 > lastAnswerTime) {
           game = this.quizRepository.calculateScore(game)
           await this.quizRepository.finishGame(game);
         }
       }
       if (game.secondPlayerProgress.answers.length === 5) {
-        // console.log(2);
-        console.log(Date.parse(game.firstPlayerProgress.answers[game.firstPlayerProgress.answers.length - 1].addedAt));
+        console.log(2);
+        // console.log(Date.parse(game.firstPlayerProgress.answers[game.firstPlayerProgress.answers.length - 1].addedAt));
+        // console.log(game.firstPlayerProgress.answers.length > 0);
         lastAnswerTime = game.firstPlayerProgress.answers.length ? Date.parse(game.firstPlayerProgress.answers[game.firstPlayerProgress.answers.length - 1].addedAt) : 0;
-        if (game.firstPlayerProgress.answers.length < 5  && Date.parse(new Date(Date.now()).toString()) - 10000 > Date.parse(game.firstPlayerProgress.answers[game.firstPlayerProgress.answers.length - 1].addedAt)) {
+        if (game.firstPlayerProgress.answers.length < 5  && Date.parse(new Date(Date.now()).toString()) - 10000 > lastAnswerTime) {
           game = this.quizRepository.calculateScore(game)
           await this.quizRepository.finishGame(game);
         }
