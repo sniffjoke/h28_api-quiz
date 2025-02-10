@@ -227,36 +227,38 @@ export class QuizRepositoryTO {
       findedGame.finishGame(saveAnswer)
       // findedGame.status = GameStatuses.Finished;
       // findedGame.finishGameDate = new Date(Date.now()).toISOString();
-      const hasCorrectAnswerFirstPlayer =
-        saveAnswer.firstPlayerProgress.answers.some(
-          (item) => item.answerStatus === 'Correct',
-        );
-      const hasCorrectAnswerSecondPlayer =
-        saveAnswer.secondPlayerProgress.answers.some(
-          (item) => item.answerStatus === 'Correct',
-        );
-      const firstPlayerLastAnswer =
-        saveAnswer.firstPlayerProgress.answers.at(-1);
-      const secondPlayerLastAnswer =
-        saveAnswer.secondPlayerProgress.answers.at(-1);
-      if (
-        firstPlayerLastAnswer &&
-        secondPlayerLastAnswer &&
-        Date.parse(firstPlayerLastAnswer.addedAt) <
-          Date.parse(secondPlayerLastAnswer.addedAt) &&
-        hasCorrectAnswerFirstPlayer
-      ) {
-        findedGame.firstPlayerProgress.score++;
-      }
-      if (
-        firstPlayerLastAnswer &&
-        secondPlayerLastAnswer &&
-        Date.parse(secondPlayerLastAnswer.addedAt) <
-          Date.parse(firstPlayerLastAnswer.addedAt) &&
-        hasCorrectAnswerSecondPlayer
-      ) {
-        findedGame.secondPlayerProgress.score++;
-      }
+
+      // const hasCorrectAnswerFirstPlayer =
+      //   saveAnswer.firstPlayerProgress.answers.some(
+      //     (item) => item.answerStatus === 'Correct',
+      //   );
+      // const hasCorrectAnswerSecondPlayer =
+      //   saveAnswer.secondPlayerProgress.answers.some(
+      //     (item) => item.answerStatus === 'Correct',
+      //   );
+      // const firstPlayerLastAnswer =
+      //   saveAnswer.firstPlayerProgress.answers.at(-1);
+      // const secondPlayerLastAnswer =
+      //   saveAnswer.secondPlayerProgress.answers.at(-1);
+      // if (
+      //   firstPlayerLastAnswer &&
+      //   secondPlayerLastAnswer &&
+      //   Date.parse(firstPlayerLastAnswer.addedAt) <
+      //     Date.parse(secondPlayerLastAnswer.addedAt) &&
+      //   hasCorrectAnswerFirstPlayer
+      // ) {
+      //   findedGame.firstPlayerProgress.score++;
+      // }
+      // if (
+      //   firstPlayerLastAnswer &&
+      //   secondPlayerLastAnswer &&
+      //   Date.parse(secondPlayerLastAnswer.addedAt) <
+      //     Date.parse(firstPlayerLastAnswer.addedAt) &&
+      //   hasCorrectAnswerSecondPlayer
+      // ) {
+      //   findedGame.secondPlayerProgress.score++;
+      // }
+      findedGame = this.calculateScore(findedGame)
       saveAnswer = await this.gRepository.save(findedGame);
       const [firstUserScore, secondUserScore] = await Promise.all([
         await this.getUserScore(saveAnswer.firstPlayerProgress.user.id),
@@ -288,6 +290,40 @@ export class QuizRepositoryTO {
       return saveScores.secondPlayerProgress.answers[
         saveAnswer.secondPlayerProgress.answers.length - 1
       ].id;
+  }
+
+  calculateScore(gamePair: GamePairEntity) {
+    const hasCorrectAnswerFirstPlayer =
+      gamePair.firstPlayerProgress.answers.some(
+        (item) => item.answerStatus === 'Correct',
+      );
+    const hasCorrectAnswerSecondPlayer =
+      gamePair.secondPlayerProgress.answers.some(
+        (item) => item.answerStatus === 'Correct',
+      );
+    const firstPlayerLastAnswer =
+      gamePair.firstPlayerProgress.answers.at(-1);
+    const secondPlayerLastAnswer =
+      gamePair.secondPlayerProgress.answers.at(-1);
+    if (
+      firstPlayerLastAnswer &&
+      secondPlayerLastAnswer &&
+      Date.parse(firstPlayerLastAnswer.addedAt) <
+      Date.parse(secondPlayerLastAnswer.addedAt) &&
+      hasCorrectAnswerFirstPlayer
+    ) {
+      gamePair.firstPlayerProgress.score++;
+    }
+    if (
+      firstPlayerLastAnswer &&
+      secondPlayerLastAnswer &&
+      Date.parse(secondPlayerLastAnswer.addedAt) <
+      Date.parse(firstPlayerLastAnswer.addedAt) &&
+      hasCorrectAnswerSecondPlayer
+    ) {
+      gamePair.secondPlayerProgress.score++;
+    }
+    return gamePair
   }
 
   //------------------------------------------------------------------------------------------//
