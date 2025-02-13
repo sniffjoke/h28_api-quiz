@@ -226,60 +226,28 @@ export class QuizRepositoryTO {
       saveAnswer.secondPlayerProgress.answers.length === 5
     ) {
       findedGame.finishGame(saveAnswer);
-      // findedGame.status = GameStatuses.Finished;
-      // findedGame.finishGameDate = new Date(Date.now()).toISOString();
-
-      // const hasCorrectAnswerFirstPlayer =
-      //   saveAnswer.firstPlayerProgress.answers.some(
-      //     (item) => item.answerStatus === 'Correct',
-      //   );
-      // const hasCorrectAnswerSecondPlayer =
-      //   saveAnswer.secondPlayerProgress.answers.some(
-      //     (item) => item.answerStatus === 'Correct',
-      //   );
-      // const firstPlayerLastAnswer =
-      //   saveAnswer.firstPlayerProgress.answers.at(-1);
-      // const secondPlayerLastAnswer =
-      //   saveAnswer.secondPlayerProgress.answers.at(-1);
-      // if (
-      //   firstPlayerLastAnswer &&
-      //   secondPlayerLastAnswer &&
-      //   Date.parse(firstPlayerLastAnswer.addedAt) <
-      //     Date.parse(secondPlayerLastAnswer.addedAt) &&
-      //   hasCorrectAnswerFirstPlayer
-      // ) {
-      //   findedGame.firstPlayerProgress.score++;
-      // }
-      // if (
-      //   firstPlayerLastAnswer &&
-      //   secondPlayerLastAnswer &&
-      //   Date.parse(secondPlayerLastAnswer.addedAt) <
-      //     Date.parse(firstPlayerLastAnswer.addedAt) &&
-      //   hasCorrectAnswerSecondPlayer
-      // ) {
-      //   findedGame.secondPlayerProgress.score++;
-      // }
       findedGame = this.calculateScore(findedGame);
       saveAnswer = await this.gRepository.save(findedGame);
-      const [firstUserScore, secondUserScore] = await Promise.all([
-        await this.getUserScore(saveAnswer.firstPlayerProgress.user.id),
-        await this.getUserScore(saveAnswer.secondPlayerProgress.user.id),
-      ]);
-      if (firstUserScore && secondUserScore) {
-        const [generateStatisticForFirstUser, generateStatisticForSecondUser] =
-          await Promise.all([
-            await this.genStatHandler.generateStatisticForUser(
-              saveAnswer.firstPlayerProgress.user,
-            ),
-            await this.genStatHandler.generateStatisticForUser(
-              saveAnswer.secondPlayerProgress.user,
-            ),
-          ]);
-        Object.assign(firstUserScore, generateStatisticForFirstUser);
-        Object.assign(secondUserScore, generateStatisticForSecondUser);
-        await this.userScoreRepository.save(firstUserScore);
-        await this.userScoreRepository.save(secondUserScore);
-      }
+      await this.recordStatistic(saveAnswer);
+      // const [firstUserScore, secondUserScore] = await Promise.all([
+      //   await this.getUserScore(saveAnswer.firstPlayerProgress.user.id),
+      //   await this.getUserScore(saveAnswer.secondPlayerProgress.user.id),
+      // ]);
+      // if (firstUserScore && secondUserScore) {
+      //   const [generateStatisticForFirstUser, generateStatisticForSecondUser] =
+      //     await Promise.all([
+      //       await this.genStatHandler.generateStatisticForUser(
+      //         saveAnswer.firstPlayerProgress.user,
+      //       ),
+      //       await this.genStatHandler.generateStatisticForUser(
+      //         saveAnswer.secondPlayerProgress.user,
+      //       ),
+      //     ]);
+      //   Object.assign(firstUserScore, generateStatisticForFirstUser);
+      //   Object.assign(secondUserScore, generateStatisticForSecondUser);
+      //   await this.userScoreRepository.save(firstUserScore);
+      //   await this.userScoreRepository.save(secondUserScore);
+      // }
     }
     saveScores = await this.gRepository.save(saveAnswer);
 
@@ -305,12 +273,15 @@ export class QuizRepositoryTO {
       );
     const firstPlayerLastAnswer = gamePair.firstPlayerProgress.answers.at(-1);
     const secondPlayerLastAnswer = gamePair.secondPlayerProgress.answers.at(-1);
-    if (gamePair.firstPlayerProgress.answers.length === 5 && gamePair.secondPlayerProgress.answers.length === 5) {
+    if (
+      gamePair.firstPlayerProgress.answers.length === 5 &&
+      gamePair.secondPlayerProgress.answers.length === 5
+    ) {
       if (
         firstPlayerLastAnswer &&
         secondPlayerLastAnswer &&
         Date.parse(firstPlayerLastAnswer.addedAt) <
-        Date.parse(secondPlayerLastAnswer.addedAt) &&
+          Date.parse(secondPlayerLastAnswer.addedAt) &&
         hasCorrectAnswerFirstPlayer
       ) {
         gamePair.firstPlayerProgress.score++;
@@ -322,7 +293,7 @@ export class QuizRepositoryTO {
         firstPlayerLastAnswer &&
         secondPlayerLastAnswer &&
         Date.parse(secondPlayerLastAnswer.addedAt) <
-        Date.parse(firstPlayerLastAnswer.addedAt) &&
+          Date.parse(firstPlayerLastAnswer.addedAt) &&
         hasCorrectAnswerSecondPlayer
       ) {
         gamePair.secondPlayerProgress.score++;
@@ -331,13 +302,38 @@ export class QuizRepositoryTO {
         gamePair.secondPlayerProgress.score++;
       }
     } else {
-      if (gamePair.firstPlayerProgress.answers.length > gamePair.secondPlayerProgress.answers.length) {
+      if (
+        gamePair.firstPlayerProgress.answers.length >
+        gamePair.secondPlayerProgress.answers.length
+      ) {
         gamePair.firstPlayerProgress.score++;
       } else {
         gamePair.secondPlayerProgress.score++;
       }
     }
     return gamePair;
+  }
+
+  async recordStatistic(gamePair: GamePairEntity) {
+    const [firstUserScore, secondUserScore] = await Promise.all([
+      await this.getUserScore(gamePair.firstPlayerProgress.user.id),
+      await this.getUserScore(gamePair.secondPlayerProgress.user.id),
+    ]);
+    if (firstUserScore && secondUserScore) {
+      const [generateStatisticForFirstUser, generateStatisticForSecondUser] =
+        await Promise.all([
+          await this.genStatHandler.generateStatisticForUser(
+            gamePair.firstPlayerProgress.user,
+          ),
+          await this.genStatHandler.generateStatisticForUser(
+            gamePair.secondPlayerProgress.user,
+          ),
+        ]);
+      Object.assign(firstUserScore, generateStatisticForFirstUser);
+      Object.assign(secondUserScore, generateStatisticForSecondUser);
+      await this.userScoreRepository.save(firstUserScore);
+      await this.userScoreRepository.save(secondUserScore);
+    }
   }
 
   //------------------------------------------------------------------------------------------//

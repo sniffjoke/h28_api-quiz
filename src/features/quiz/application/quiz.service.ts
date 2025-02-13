@@ -22,13 +22,12 @@ export class QuizService {
   }
 
   @Cron(CronExpression.EVERY_10_SECONDS)
-  async loggerId() {
+  async checkFinishTime() {
     let lastAnswerTime;
     const currentActiveGames = await this.quizRepository.findAllActiveGames()
     for (let game of currentActiveGames) {
       if (game.firstPlayerProgress.answers.length === 5) {
         lastAnswerTime = game.secondPlayerProgress.answers.length ? Date.parse(game.secondPlayerProgress.answers[game.secondPlayerProgress.answers.length - 1].addedAt) : 0;
-        // if (game.secondPlayerProgress.answers.length < 5) {}
         if (game.secondPlayerProgress.answers.length < 5  && Date.parse(new Date(Date.now()).toISOString().slice(0, 19).replace('T', ' ')) - 10000 > lastAnswerTime) {
           game = this.quizRepository.calculateScore(game)
           await this.quizRepository.finishGame(game);
@@ -39,16 +38,11 @@ export class QuizService {
           ? Date.parse(game.firstPlayerProgress.answers[game.firstPlayerProgress.answers.length - 1].addedAt)
           : Date.parse(game.secondPlayerProgress.answers[game.secondPlayerProgress.answers.length - 1].addedAt);
         if (game.firstPlayerProgress.answers.length < 5  && Date.parse(new Date(Date.now()).toISOString().slice(0, 19).replace('T', ' ')) - 10000 > lastAnswerTime) {
-          // new Date(Date.now()).toISOString().slice(0, 19).replace('T', ' ')
-          // console.log('difference: ', Date.parse(new Date(Date.now()).toISOString()) - lastAnswerTime);
-          // console.log('curr: ', Date.parse(new Date(Date.now()).toISOString().slice(0, 19).replace('T', ' ')));
-          console.log('last: ', lastAnswerTime);
-          // console.log('finish');
           game = this.quizRepository.calculateScore(game)
-          // console.log('game: ', game);
           await this.quizRepository.finishGame(game);
         }
       }
+      await this.quizRepository.recordStatistic(game)
     }
   }
 
