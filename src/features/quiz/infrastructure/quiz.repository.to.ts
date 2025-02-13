@@ -288,9 +288,6 @@ export class QuizRepositoryTO {
         saveAnswer.firstPlayerProgress.answers.length - 1
       ].id;
     } else {
-      console.log(Date.parse(saveScores.secondPlayerProgress.answers[
-      saveAnswer.secondPlayerProgress.answers.length - 1
-        ].addedAt));
       return saveScores.secondPlayerProgress.answers[
         saveAnswer.secondPlayerProgress.answers.length - 1
       ].id;
@@ -308,33 +305,38 @@ export class QuizRepositoryTO {
       );
     const firstPlayerLastAnswer = gamePair.firstPlayerProgress.answers.at(-1);
     const secondPlayerLastAnswer = gamePair.secondPlayerProgress.answers.at(-1);
-    console.log('fst: ', firstPlayerLastAnswer);
-    console.log('scd: ', secondPlayerLastAnswer);
-    if (
-      firstPlayerLastAnswer &&
-      secondPlayerLastAnswer &&
-      Date.parse(firstPlayerLastAnswer.addedAt) <
+    if (gamePair.firstPlayerProgress.answers.length === 5 && gamePair.secondPlayerProgress.answers.length === 5) {
+      if (
+        firstPlayerLastAnswer &&
+        secondPlayerLastAnswer &&
+        Date.parse(firstPlayerLastAnswer.addedAt) <
         Date.parse(secondPlayerLastAnswer.addedAt) &&
-      hasCorrectAnswerFirstPlayer
-    ) {
-      gamePair.firstPlayerProgress.score++;
-    }
-    if (!secondPlayerLastAnswer) {
-      gamePair.firstPlayerProgress.score++;
-    }
-    if (
-      firstPlayerLastAnswer &&
-      secondPlayerLastAnswer &&
-      Date.parse(secondPlayerLastAnswer.addedAt) <
+        hasCorrectAnswerFirstPlayer
+      ) {
+        gamePair.firstPlayerProgress.score++;
+      }
+      if (!secondPlayerLastAnswer) {
+        gamePair.firstPlayerProgress.score++;
+      }
+      if (
+        firstPlayerLastAnswer &&
+        secondPlayerLastAnswer &&
+        Date.parse(secondPlayerLastAnswer.addedAt) <
         Date.parse(firstPlayerLastAnswer.addedAt) &&
-      hasCorrectAnswerSecondPlayer
-    ) {
-      gamePair.secondPlayerProgress.score++;
+        hasCorrectAnswerSecondPlayer
+      ) {
+        gamePair.secondPlayerProgress.score++;
+      }
+      if (!firstPlayerLastAnswer) {
+        gamePair.secondPlayerProgress.score++;
+      }
+    } else {
+      if (gamePair.firstPlayerProgress.answers.length > gamePair.secondPlayerProgress.answers.length) {
+        gamePair.firstPlayerProgress.score++;
+      } else {
+        gamePair.secondPlayerProgress.score++;
+      }
     }
-    if (!firstPlayerLastAnswer) {
-      gamePair.secondPlayerProgress.score++;
-    }
-    console.log('gamePairAfter: ', gamePair);
     return gamePair;
   }
 
