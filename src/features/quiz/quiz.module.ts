@@ -14,6 +14,7 @@ import { QuestionsController } from './api/questions.controller';
 import { UserScoreEntity } from './domain/user-score.entity';
 import { GenerateStatisticHandler } from './domain/generate-statistic.handler';
 import { LoggerService } from '../../logger.service';
+import { QuizCommandHandlers } from './application/useCases';
 
 @Module({
   imports: [
@@ -33,9 +34,11 @@ import { LoggerService } from '../../logger.service';
     QuizRepositoryTO,
     QuizService,
     GenerateStatisticHandler,
-    LoggerService
+    LoggerService,
+    ...QuizCommandHandlers
   ],
   exports: [
+    ...QuizCommandHandlers,
     // QuizQueryRepositoryTO
   ]
 })
