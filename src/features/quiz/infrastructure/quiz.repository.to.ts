@@ -202,14 +202,8 @@ export class QuizRepositoryTO {
   //-------------------------------------Questions--------------------------------------------//
   //------------------------------------------------------------------------------------------//
 
-  async createQuestion(
-    questionData: CreateQuestionInputModel,
-  ): Promise<QuestionEntity> {
-    const question = new QuestionEntity();
-    question.body = questionData.body;
-    question.correctAnswers = questionData.correctAnswers;
-    const newQuestion = await this.questionRepository.save(question);
-    return newQuestion;
+  async saveQuestion(question: QuestionEntity) {
+    return await this.questionRepository.save(question)
   }
 
   async findQuestionById(id: string) {
@@ -231,7 +225,7 @@ export class QuizRepositoryTO {
       ...questionData,
       updatedAt: new Date(Date.now()).toISOString(),
     });
-    return await this.questionRepository.save(findedQuestion);
+    return await this.saveQuestion(findedQuestion);
   }
 
   async deleteQuestion(id: string) {
@@ -244,10 +238,8 @@ export class QuizRepositoryTO {
     updateData: UpdatePublishStatusInputModel,
   ) {
     const findedQuestion = await this.findQuestionById(id);
-    findedQuestion.published = updateData.published;
-    findedQuestion.updatedAt = new Date(Date.now()).toISOString();
-    const updatedQuestion = await this.questionRepository.save(findedQuestion);
-    return updatedQuestion;
+    findedQuestion.updatePublishStatus(findedQuestion, updateData)
+    return await this.saveQuestion(findedQuestion);
   }
 }
 
@@ -331,4 +323,13 @@ export class QuizRepositoryTO {
 //       saveAnswer.secondPlayerProgress.answers.length - 1
 //     ].id;
 //   }
+// }
+
+
+// async createQuestion(
+//   questionData: CreateQuestionInputModel,
+// ): Promise<QuestionEntity> {
+//   const question = QuestionEntity.createQuestion(questionData);
+//   const newQuestion = await this.saveQuestion(question);
+//   return newQuestion;
 // }

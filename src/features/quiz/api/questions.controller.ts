@@ -15,19 +15,22 @@ import { QuizQueryRepositoryTO } from '../infrastructure/quiz.query-repository.t
 import { CreateQuestionInputModel } from './models/input/create-question.input.model';
 import { BasicAuthGuard } from '../../../core/guards/basic-auth.guard';
 import { UpdatePublishStatusInputModel } from './models/input/update-publish-status.input.model';
+import { CommandBus } from '@nestjs/cqrs';
+import { CreateQuestionCommand } from '../application/useCases/create-question.use-case';
 
 @Controller('sa/quiz')
 export class QuestionsController {
   constructor(
     private readonly quizService: QuizService,
     private readonly quizQueryRepository: QuizQueryRepositoryTO,
+    private readonly commandBus: CommandBus,
   ) {
   }
 
   @Post('questions')
   @UseGuards(BasicAuthGuard)
   async createNewQuestion(@Body() questionData: CreateQuestionInputModel) {
-    const newQuestionId = await this.quizService.createNewQuestion(questionData);
+    const newQuestionId = await this.commandBus.execute(new CreateQuestionCommand(questionData));
     return await this.quizQueryRepository.questionOutput(newQuestionId)
   }
 

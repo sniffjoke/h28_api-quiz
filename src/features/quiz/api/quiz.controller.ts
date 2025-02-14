@@ -9,6 +9,7 @@ import { UsersService } from '../../users/application/users.service';
 import { JwtAuthStrategy } from '../../../core/guards/jwt-auth-strat.guard';
 import { CommandBus } from '@nestjs/cqrs';
 import { SendAnswerCommand } from '../application/useCases/send-answer.use-case';
+import { CreateOrConnectCommand } from '../application/useCases/create-or-connect.use-case';
 
 @Controller('pair-game-quiz')
 export class QuizController {
@@ -46,7 +47,7 @@ export class QuizController {
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
   async createOrConnectToConnection(@Req() req: Request): Promise<GamePairViewModel> {
-    const gameId = await this.quizService.createOrConnect(req.headers.authorization as string);
+    const gameId = await this.commandBus.execute(new CreateOrConnectCommand(req.headers.authorization as string));
     const findedGame = await this.quizQueryRepository.gameOutput(gameId);
     return findedGame;
   }
@@ -55,7 +56,6 @@ export class QuizController {
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
   async sendAnswer(@Body() answerData: CreateAnswerInputModel, @Req() req: Request) {
-    // const answerId = await this.quizService.sendAnswer(answerData, req.headers.authorization as string);
     const answerId = await this.commandBus.execute(new SendAnswerCommand(answerData, req.headers.authorization as string));
     return this.quizQueryRepository.answerOutput(answerId);
   }

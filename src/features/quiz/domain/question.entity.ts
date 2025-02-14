@@ -1,15 +1,12 @@
 import {
   Column,
-  CreateDateColumn,
   Entity,
-  JoinColumn, ManyToMany,
-  ManyToOne,
-  OneToMany,
-  OneToOne,
-  PrimaryGeneratedColumn, UpdateDateColumn,
+  ManyToMany,
+  PrimaryGeneratedColumn,
 } from 'typeorm';
 import { GamePairEntity } from './game-pair.entity';
-import { AnswerEntity } from './answer.entity';
+import { CreateQuestionInputModel } from '../api/models/input/create-question.input.model';
+import { UpdatePublishStatusInputModel } from '../api/models/input/update-publish-status.input.model';
 
 
 @Entity('question')
@@ -35,6 +32,18 @@ export class QuestionEntity {
 
   @ManyToMany(() => GamePairEntity, (gamePair) => gamePair.questions)
   gamePairs: GamePairEntity[];
+
+  static createQuestion(questionData: CreateQuestionInputModel): QuestionEntity {
+    const question = new QuestionEntity();
+    question.body = questionData.body;
+    question.correctAnswers = questionData.correctAnswers;
+    return question;
+  }
+
+  updatePublishStatus(question: QuestionEntity, updateData: UpdatePublishStatusInputModel): void {
+    question.published = updateData.published;
+    question.updatedAt = new Date(Date.now()).toISOString();
+  }
 
 }
 
