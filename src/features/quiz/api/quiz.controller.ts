@@ -10,6 +10,9 @@ import { JwtAuthStrategy } from '../../../core/guards/jwt-auth-strat.guard';
 import { CommandBus } from '@nestjs/cqrs';
 import { SendAnswerCommand } from '../application/useCases/send-answer.use-case';
 import { CreateOrConnectCommand } from '../application/useCases/create-or-connect.use-case';
+import { GetGameCommand } from '../application/useCases/get-game-by-id.use-case';
+import { GetCurGameForUserCommand } from '../application/useCases/get-current-game-for-user.use-case';
+import { GetStatForUserCommand } from '../application/useCases/get-stat-for-user.use-case';
 
 @Controller('pair-game-quiz')
 export class QuizController {
@@ -31,7 +34,7 @@ export class QuizController {
   @Get('pairs/my-current')
   @UseGuards(JwtAuthGuard)
   async getCurrentUnfUserGame(@Req() req: Request): Promise<GamePairViewModel> {
-    const findedGame = await this.quizService.getCurrentUnfGame(req.headers.authorization as string);
+    const findedGame = await this.commandBus.execute(new GetCurGameForUserCommand(req.headers.authorization as string));
     return this.quizQueryRepository.gamePairOutputMap(findedGame);
   }
 
@@ -39,7 +42,7 @@ export class QuizController {
   @Get('pairs/:id')
   // @UseGuards(JwtAuthGuard)
   async getGameById(@Param('id') id: number, @Req() req: Request): Promise<GamePairViewModel> {
-    const findedGame = await this.quizService.findGameById(id, req.headers.authorization as string);
+    const findedGame = await this.commandBus.execute(new GetGameCommand(id, req.headers.authorization as string));
     return this.quizQueryRepository.gamePairOutputMap(findedGame);
   }
 
@@ -63,7 +66,7 @@ export class QuizController {
   @Get('users/my-statistic')
   @UseGuards(JwtAuthGuard)
   async getMyStatistic(@Req() req: Request) {
-    const myStatistic = await this.quizService.findOneStat(req.headers.authorization as string)
+    const myStatistic = await this.commandBus.execute(new GetStatForUserCommand(req.headers.authorization as string));
     const myStatisticOutput = this.quizQueryRepository.myStatisticOutputMap(myStatistic)
     return myStatisticOutput
   }

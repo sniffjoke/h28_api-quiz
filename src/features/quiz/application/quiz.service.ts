@@ -11,11 +11,7 @@ export class QuizService {
     private readonly quizRepository: QuizRepositoryTO,
     private readonly usersService: UsersService,
     private logger: LoggerService,
-  ) {}
-
-  async getCurrentUnfGame(bearerHeader: string) {
-    const user = await this.usersService.getUserByAuthToken(bearerHeader);
-    return await this.quizRepository.findGameByUser(user);
+  ) {
   }
 
   @Cron(CronExpression.EVERY_10_SECONDS)
@@ -78,24 +74,6 @@ export class QuizService {
       await this.quizRepository.recordStatistic(game);
     }
   }
-
-  async findGameById(id: number, bearerHeader: string) {
-    const user = await this.usersService.getUserByAuthToken(bearerHeader);
-    return await this.quizRepository.findGameById(id, user);
-  }
-
-  //------------------------------------------------------------------------------------------//
-  //--------------------------------------STATISTIC-------------------------------------------//
-  //------------------------------------------------------------------------------------------//
-
-  async findOneStat(bearerHeader: string) {
-    const user = await this.usersService.getUserByAuthToken(bearerHeader);
-    return await this.quizRepository.findStatistic(user);
-  }
-
-  //------------------------------------------------------------------------------------------//
-  //-----------------------------------------ANSWERS------------------------------------------//
-  //------------------------------------------------------------------------------------------//
 
   calculateScore(gamePair: GamePairEntity) {
     const hasCorrectAnswerFirstPlayer =
