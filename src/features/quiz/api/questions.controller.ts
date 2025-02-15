@@ -17,6 +17,9 @@ import { BasicAuthGuard } from '../../../core/guards/basic-auth.guard';
 import { UpdatePublishStatusInputModel } from './models/input/update-publish-status.input.model';
 import { CommandBus } from '@nestjs/cqrs';
 import { CreateQuestionCommand } from '../application/useCases/create-question.use-case';
+import { DeleteQuestionCommand } from '../application/useCases/delete-question.use-case';
+import { UpdateQuestionCommand } from '../application/useCases/update-question.use-case';
+import { UpdatePublishStatusCommand } from '../application/useCases/update-publish-status.use-case';
 
 @Controller('sa/quiz')
 export class QuestionsController {
@@ -44,21 +47,21 @@ export class QuestionsController {
   @UseGuards(BasicAuthGuard)
   @HttpCode(204)
   async updateQuestion(@Body() questionData: CreateQuestionInputModel, @Param('id') id: string) {
-    return await this.quizService.updateQuestionById(id, questionData);
+    return await this.commandBus.execute(new UpdateQuestionCommand(id, questionData));
   }
 
   @Delete('questions/:id')
   @UseGuards(BasicAuthGuard)
   @HttpCode(204)
   async createQuestion(@Param('id') id: string) {
-    return await this.quizService.deleteQuestion(id);
+    return await this.commandBus.execute(new DeleteQuestionCommand(id));
   }
 
   @Put('questions/:id/publish')
   @UseGuards(BasicAuthGuard)
   @HttpCode(204)
   async changePublishStatus(@Body() updateData: UpdatePublishStatusInputModel, @Param('id') id: string) {
-    return await this.quizService.updateQuestionPublish(id, updateData);
+    return await this.commandBus.execute(new UpdatePublishStatusCommand(id, updateData));
   }
 
 }
