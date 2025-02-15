@@ -9,7 +9,6 @@ import { LoggerService } from '../../../logger.service';
 export class QuizService {
   constructor(
     private readonly quizRepository: QuizRepositoryTO,
-    private readonly usersService: UsersService,
     private logger: LoggerService,
   ) {
   }

@@ -17,7 +17,6 @@ import { GetStatForUserCommand } from '../application/useCases/get-stat-for-user
 @Controller('pair-game-quiz')
 export class QuizController {
   constructor(
-    private readonly quizService: QuizService,
     private readonly quizQueryRepository: QuizQueryRepositoryTO,
     private readonly usersService: UsersService,
     private readonly commandBus: CommandBus,
